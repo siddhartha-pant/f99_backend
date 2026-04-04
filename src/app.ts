@@ -27,25 +27,7 @@ const app = express();
 // ── Security headers ──
 app.use(helmet());
 
-// ── CORS — whitelist your frontend domain only ──
-const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? "http://localhost:5173")
-  .split(",")
-  .map((o) => o.trim());
-
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, Postman)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`CORS: origin ${origin} not allowed.`));
-      }
-    },
-    credentials: true,
-  }),
-);
-
+app.use(cors());
 // ── Rate limiting ──
 // Strict limit on auth routes to prevent brute-force
 const authLimiter = rateLimit({
