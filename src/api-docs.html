@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fitness Tracker API Docs</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    h1 { color: #2c3e50; }
+    code, pre { background: #f4f4f4; padding: 2px 4px; border-radius: 3px; }
+    .route { margin-bottom: 2rem; }
+    .method { font-weight: bold; color: #2980b9; }
+    .protected { color: #e67e22; font-size: 0.9em; }
+    .example { background: #f9f9f9; border-left: 4px solid #2980b9; padding: 1em; margin: 1em 0; }
+    .desc { margin: 0.5em 0 1em 0; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Fitness Tracker API Documentation</h1>
+  <p>This backend is running! Below are the available endpoints, descriptions, and example requests.</p>
+
+  <div class="route">
+    <span class="method">POST</span> <code>/api/v1/auth/signup</code><br>
+    <div class="desc">Register a new user. Returns a JWT token. <b>Automatically creates a profile for the user using the signup information.</b> The user can immediately fetch their profile after signup.<br><br><b>Profile fields not provided at signup (e.g., weight, trainingExperience, aim, bodyMeasurements) will be empty and can be updated later.</b></div>
+    <b>Body:</b> <code>{ name (required), email (required), password (required), gender (required), age (required) }</code>
+    <div class="example">
+      Example Request:<br>
+      <pre>{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "secret123",
+  "gender": "male",
+  "age": 25
+}</pre>
+      Example Response:<br>
+      <pre>{
+  "message": "Signup successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">POST</span> <code>/api/v1/auth/signin</code><br>
+    <div class="desc">Authenticate a user and receive a JWT token.</div>
+    <b>Body:</b> <code>{ email, password }</code>
+    <div class="example">
+      Example Request:<br>
+      <pre>{
+  "email": "john@example.com",
+  "password": "secret123"
+}</pre>
+      Example Response:<br>
+      <pre>{
+  "message": "Signin successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">POST</span> <code>/api/v1/auth/verify-email</code><br>
+    <div class="desc">Verify a user's email address using a token (feature currently disabled).</div>
+    <b>Body:</b> <code>{ token }</code>
+    <div class="example">
+      Example Request:<br>
+      <pre>{
+  "token": "your-verification-token"
+}</pre>
+      Example Response:<br>
+      <pre>{
+  "message": "Email verified successfully"
+}</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">POST</span> <code>/api/v1/profile</code> <span class="protected">(JWT required)</span><br>
+    <div class="desc">Create or overwrite the user's profile.</div>
+    <b>Body:</b> <code>{ weight, age, gender, trainingExperience, aim, bodyMeasurements }</code>
+    <div class="example">
+      Example Request:<br>
+      <pre>{
+  "weight": 70,
+  "age": 25,
+  "gender": "male",
+  "trainingExperience": "beginner",
+  "aim": "lose weight",
+  "bodyMeasurements": {
+    "chest": 90,
+    "waist": 80
+  }
+}</pre>
+      Example Response:<br>
+      <pre>{
+  "message": "Profile saved",
+  "profile": {
+    "_id": "60f7c2...",
+    "user": "60f7c2...",
+    "weight": 70,
+    "age": 25,
+    "gender": "male",
+    "trainingExperience": "beginner",
+    "aim": "lose weight",
+    "bodyMeasurements": {
+      "chest": 90,
+      "waist": 80
+    }
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">GET</span> <code>/api/v1/profile</code> <span class="protected">(JWT required)</span><br>
+    <div class="desc">Fetch the user's profile details. <b>All profile fields are always present in the response, with empty values if not set.</b></div>
+    <div class="example">
+      Example Response:<br>
+      <pre>{
+  "_id": "60f7c2...",
+  "user": "60f7c2...",
+  "weight": "",
+  "age": "",
+  "gender": "",
+  "trainingExperience": "",
+  "aim": "",
+  "bodyMeasurements": {}
+}</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">PATCH</span> <code>/api/v1/profile</code> <span class="protected">(JWT required)</span><br>
+    <div class="desc">Update specific fields in the user's profile.</div>
+    <div class="example">
+      Example Request:<br>
+      <pre>{
+  "weight": 72
+}</pre>
+      Example Response:<br>
+      <pre>{
+  "message": "Profile updated",
+  "profile": {
+    "_id": "60f7c2...",
+    "user": "60f7c2...",
+    "weight": 72,
+    // ...other fields
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">POST</span> <code>/api/v1/progress</code> <span class="protected">(JWT required)</span><br>
+    <div class="desc">Log daily progress metrics (e.g., weight, energy level, notes).</div>
+    <b>Body:</b> <code>{ weight, energyLevel, notes }</code>
+    <div class="example">
+      Example Request:<br>
+      <pre>{
+  "weight": 71,
+  "energyLevel": "high",
+  "notes": "Felt great today!"
+}</pre>
+      Example Response:<br>
+      <pre>{
+  "message": "Progress logged",
+  "entry": {
+    "_id": "60f7c2...",
+    "user": "60f7c2...",
+    "weight": 71,
+    "energyLevel": "high",
+    "notes": "Felt great today!",
+    "date": "2025-06-28T10:00:00.000Z"
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">GET</span> <code>/api/v1/progress</code> <span class="protected">(JWT required)</span><br>
+    <div class="desc">Fetch all progress logs for the user.</div>
+    <div class="example">
+      Example Response:<br>
+      <pre>[
+  {
+    "_id": "60f7c2...",
+    "user": "60f7c2...",
+    "weight": 71,
+    "energyLevel": "high",
+    "notes": "Felt great today!",
+    "date": "2025-06-28T10:00:00.000Z"
+  }
+]</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">PATCH</span> <code>/api/v1/progress/:entryId</code> <span class="protected">(JWT required)</span><br>
+    <div class="desc">Update a specific daily progress log by its ID.</div>
+    <div class="example">
+      Example Request:<br>
+      <pre>{
+  "notes": "Felt tired today."
+}</pre>
+      Example Response:<br>
+      <pre>{
+  "message": "Progress updated",
+  "entry": {
+    "_id": "60f7c2...",
+    "user": "60f7c2...",
+    "notes": "Felt tired today."
+    // ...other fields
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">POST</span> <code>/api/v1/upload/profile-image</code> <span class="protected">(JWT required, multipart/form-data)</span><br>
+    <div class="desc">Upload a profile image for the user. Returns the image URL.</div>
+    <div class="example">
+      Example Response:<br>
+      <pre>{
+  "message": "Profile image uploaded",
+  "url": "https://res.cloudinary.com/your-cloud/image/upload/v1234567890/profile.jpg"
+}</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">POST</span> <code>/api/v1/nutrition/meal</code> <span class="protected">(JWT required)</span><br>
+    <div class="desc">Log a meal with calories, macros, and date.</div>
+    <b>Body:</b> <code>{ name, calories, protein, carbs, fat, date }</code>
+    <div class="example">
+      Example Request:<br>
+      <pre>{
+  "name": "Breakfast",
+  "calories": 400,
+  "protein": 20,
+  "carbs": 50,
+  "fat": 10,
+  "date": "2025-06-15T08:00:00.000Z"
+}</pre>
+      Example Response:<br>
+      <pre>{
+  "message": "Meal logged",
+  "meal": {
+    "_id": "60f7c2...",
+    "user": "60f7c2...",
+    "name": "Breakfast",
+    "calories": 400,
+    "protein": 20,
+    "carbs": 50,
+    "fat": 10,
+    "date": "2025-06-15T08:00:00.000Z"
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">GET</span> <code>/api/v1/nutrition/meal</code> <span class="protected">(JWT required)</span><br>
+    <div class="desc">Fetch all logged meals for the user.</div>
+    <div class="example">
+      Example Response:<br>
+      <pre>[
+  {
+    "_id": "60f7c2...",
+    "user": "60f7c2...",
+    "name": "Breakfast",
+    "calories": 400,
+    "protein": 20,
+    "carbs": 50,
+    "fat": 10,
+    "date": "2025-06-15T08:00:00.000Z"
+  }
+]</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">POST</span> <code>/api/v1/nutrition/water</code> <span class="protected">(JWT required)</span><br>
+    <div class="desc">Log water intake (in milliliters) for the user.</div>
+    <b>Body:</b> <code>{ amount, date }</code>
+    <div class="example">
+      Example Request:<br>
+      <pre>{
+  "amount": 500,
+  "date": "2025-06-15T09:00:00.000Z"
+}</pre>
+      Example Response:<br>
+      <pre>{
+  "message": "Water intake logged",
+  "water": {
+    "_id": "60f7c2...",
+    "user": "60f7c2...",
+    "amount": 500,
+    "date": "2025-06-15T09:00:00.000Z"
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">GET</span> <code>/api/v1/nutrition/water</code> <span class="protected">(JWT required)</span><br>
+    <div class="desc">Fetch all water intake logs for the user.</div>
+    <div class="example">
+      Example Response:<br>
+      <pre>[
+  {
+    "_id": "60f7c2...",
+    "user": "60f7c2...",
+    "amount": 500,
+    "date": "2025-06-15T09:00:00.000Z"
+  }
+]</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">POST</span> <code>/api/v1/progress-photo/photo</code> <span class="protected">(JWT required, multipart/form-data)</span><br>
+    <div class="desc">Upload a daily progress photo. Optionally include a note. Returns the photo URL and metadata.</div>
+    <b>Form-data:</b> <code>photo</code> (required, file), <code>note</code> (optional, string)
+    <div class="example">
+      Example Response:<br>
+      <pre>{
+  "message": "Progress photo uploaded",
+  "photo": {
+    "_id": "60f7c2...",
+    "user": "60f7c2...",
+    "photoUrl": "https://res.cloudinary.com/your-cloud/image/upload/v1234567890/progress.jpg",
+    "note": "Day 1 progress!",
+    "date": "2025-06-28T10:00:00.000Z"
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="route">
+    <span class="method">GET</span> <code>/api/v1/progress-photo/photo</code> <span class="protected">(JWT required)</span><br>
+    <div class="desc">Fetch all uploaded progress photos for the user, sorted by date (most recent first).</div>
+    <div class="example">
+      Example Response:<br>
+      <pre>[
+  {
+    "_id": "60f7c2...",
+    "user": "60f7c2...",
+    "photoUrl": "https://res.cloudinary.com/your-cloud/image/upload/v1234567890/progress.jpg",
+    "note": "Day 1 progress!",
+    "date": "2025-06-28T10:00:00.000Z"
+  }
+]</pre>
+    </div>
+  </div>
+
+  <hr>
+  <p>All protected routes require a JWT token in the <code>Authorization: Bearer &lt;token&gt;</code> header.</p>
+</body>
+</html>
