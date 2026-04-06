@@ -1,37 +1,22 @@
 import { Router } from "express";
-import { logMeal, getMeals } from "../controllers/meal.controller";
-import { logWater, getWaterLogs } from "../controllers/water.controller";
 import {
-  saveDiaryEntry,
-  getDiaryEntries,
-} from "../controllers/diary.controller";
-import { foodSearch } from "../controllers/foodSearch.controller";
+  createOrUpdateProfile,
+  getProfile,
+  updateProfile,
+  getFullProfileData,
+} from "../controllers/profile.controller";
 import auth from "../middlewares/auth";
-import { validateMeal } from "../middlewares/validation";
-
-function asyncHandler(fn: any) {
-  return (req: any, res: any, next: any) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-  };
-}
+import { validateProfile } from "../middlewares/validation";
 
 const router = Router();
 
-/* ── Meals ── */
-router.post("/meal", auth, validateMeal, asyncHandler(logMeal));
-router.get("/meal", auth, asyncHandler(getMeals));
+const asyncHandler = (fn: any) => (req: any, res: any, next: any) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
 
-/* ── Water ── */
-router.post("/water", auth, asyncHandler(logWater));
-router.get("/water", auth, asyncHandler(getWaterLogs));
-
-/* ── Diary ── */
-router.post("/diary", auth, asyncHandler(saveDiaryEntry));
-router.get("/diary", auth, asyncHandler(getDiaryEntries));
-
-/* ── Food search (USDA proxy — no key in frontend) ── */
-// Public so unauthenticated users can still search food items,
-// but switch to `auth,` before asyncHandler if you want it locked down.
-router.get("/food-search", asyncHandler(foodSearch));
+router.post("/", auth, validateProfile, asyncHandler(createOrUpdateProfile));
+router.patch("/", auth, asyncHandler(updateProfile));
+router.get("/full", auth, asyncHandler(getFullProfileData));
+router.get("/", auth, asyncHandler(getProfile));
 
 export default router;
