@@ -3,7 +3,8 @@ import User from "../models/user.model";
 import Profile from "../models/profile.model";
 import FoodEntry from "../models/foodEntry.model";
 import DiaryEntry from "../models/diaryEntry.model";
-import { calculateGoals, calculateStreak } from "../utils/calculateGoals";
+import Goal from "../models/goal.model";
+import { calculateStreak } from "../utils/calculateGoals";
 
 export const createOrUpdateProfile = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -67,24 +68,31 @@ export const getFullProfileData = async (req: Request, res: Response, next: Next
 
     const todayStr = new Date().toLocaleDateString();
 
-    const todayFoodEntry = await FoodEntry.findOneAndUpdate(
-      { user: userId, date: todayStr },
-      { $setOnInsert: { foods: [], water: 0 } },
-      { new: true, upsert: true }
-    );
+    const [todayFoodEntry, diaryEntries, rawGoals] = await Promise.all([
+      FoodEntry.findOneAndUpdate(
+        { user: userId, date: todayStr },
+        { $setOnInsert: { foods: [], water: 0 } },
+        { new: true, upsert: true }
+      ),
+      DiaryEntry.find({ user: userId }).sort({ date: -1 }).limit(10),
+      // ← fetch real Goal documents so _id is always present
+      Goal.find({ user: userId }).sort({ createdAt: -1 }).lean(),
+    ]);
 
-    const diaryEntries = await DiaryEntry.find({ user: userId })
-      .sort({ date: -1 })
-      .limit(10); // first page only — frontend loads more on demand
-
-    let goals: any[] = [];
     let streak = 0;
     try {
-      goals = calculateGoals(profile, diaryEntries);
       streak = calculateStreak(diaryEntries);
     } catch (utilErr) {
-      console.error("calculateGoals/calculateStreak error:", utilErr);
+      console.error("calculateStreak error:", utilErr);
     }
+
+    // Compute progress on the server so the shape is consistent
+    const goals = rawGoals.map((g) => ({
+      ...g,
+      // lean() gives _id as ObjectId — stringify it so JSON has a plain string
+      _id: g._id.toString(),
+      progress: Math.min(100, Math.round(((g.current ?? 0) / (g.target || 1)) * 100)),
+    }));
 
     const totals = (todayFoodEntry.foods ?? []).reduce(
       (acc: any, f: any) => {
@@ -104,7 +112,6 @@ export const getFullProfileData = async (req: Request, res: Response, next: Next
       user: {
         name: user.name,
         avatar: user.profileImage ?? "https://i.pravatar.cc/150?img=3",
-        // ── Profile stats for InsightsPanel ──
         age: profile.age,
         gender: profile.gender,
         weight: profile.weight,
@@ -128,7 +135,7 @@ export const getFullProfileData = async (req: Request, res: Response, next: Next
         totals,
       },
       diaryEntries,
-      goals,
+      goals,   // ← real Goal docs with _id strings
       streak,
       targets,
     });
