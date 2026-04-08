@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { getNextWeight } from "../utils/progression.logic";
 import {
   createLog,
   getLogsByUser,
