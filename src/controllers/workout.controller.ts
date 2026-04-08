@@ -6,16 +6,23 @@ import {
 } from "../repositories/workout.repository";
 import { getNextWeight } from "../utils/progression.logic";
 
-
 //  Log Exercise
 export const logExercise = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const { userId, programId, exerciseName, workoutDay, sets } = req.body;
+    const { programId, exerciseName, workoutDay, sets } = req.body;
+    const userId = (req as any).user?.userId;
 
-    if (!userId || !programId || !exerciseName || !sets) {
+    if (
+      !userId ||
+      !programId ||
+      !exerciseName ||
+      !workoutDay ||
+      !Array.isArray(sets) ||
+      sets.length === 0
+    ) {
       res.status(400).json({ message: "Missing required fields" });
       return;
     }
@@ -36,14 +43,18 @@ export const logExercise = async (
   }
 };
 
-
 //  Get User Logs
 export const getUserLogs = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const { userId } = req.params;
+    const userId = (req as any).user?.userId;
+
+    if (!userId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
 
     const logs = await getLogsByUser(userId);
 
@@ -54,14 +65,19 @@ export const getUserLogs = async (
   }
 };
 
-
 //  Get Suggested Weight
 export const getSuggestedWeight = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const { userId, exerciseName } = req.body;
+    const { exerciseName } = req.body;
+    const userId = (req as any).user?.userId;
+
+    if (!userId || !exerciseName) {
+      res.status(400).json({ message: "Missing required fields" });
+      return;
+    }
 
     const lastLog = await getLastExerciseLog(userId, exerciseName);
 

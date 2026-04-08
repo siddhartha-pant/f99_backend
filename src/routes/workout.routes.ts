@@ -1,4 +1,5 @@
 import express from "express";
+import auth from "../middlewares/auth";
 import {
   logExercise,
   getUserLogs,
@@ -7,8 +8,8 @@ import {
 
 const router = express.Router();
 
-router.post("/log", logExercise);
-router.get("/logs/:userId", getUserLogs);
-router.post("/suggest-weight", getSuggestedWeight);
+router.post("/log", auth, logExercise);
+router.get("/logs", auth, getUserLogs);
+router.post("/suggest-weight", auth, getSuggestedWeight);
 
 export default router;
