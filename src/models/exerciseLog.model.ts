@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface ISet {
-  weight: number;   // kg
+  weight: number; // kg
   reps: number;
 }
 
@@ -92,30 +92,20 @@ const exerciseLogSchema = new Schema<IExerciseLog>(
   }
 );
 
-
 // AUTO CALCULATIONS BEFORE SAVE
 exerciseLogSchema.pre("save", function (next) {
   if (this.sets && this.sets.length > 0) {
     // Max weight
-    this.maxWeight = Math.max(...this.sets.map(s => s.weight));
+    this.maxWeight = Math.max(...this.sets.map((s) => s.weight));
 
     // Total volume = sum(weight * reps)
-    this.totalVolume = this.sets.reduce(
-      (acc, s) => acc + s.weight * s.reps,
-      0
-    );
+    this.totalVolume = this.sets.reduce((acc, s) => acc + s.weight * s.reps, 0);
   }
 
   next();
 });
 
-
 //  INDEXES (for fast queries later)
 exerciseLogSchema.index({ userId: 1, exerciseName: 1 });
-exerciseLogSchema.index({ programId: 1 });
 
-
-export default mongoose.model<IExerciseLog>(
-  "ExerciseLog",
-  exerciseLogSchema
-);
+export default mongoose.model<IExerciseLog>("ExerciseLog", exerciseLogSchema);

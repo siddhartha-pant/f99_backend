@@ -7,17 +7,18 @@ import {
 } from "../repositories/program.repository";
 import { adjustDifficulty } from "../utils/progression.logic";
 
-
 //  Generate Program
 export const generateProgram = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const { days, goal, location } = req.body;
+    const { goal, location } = req.body;
+    const daysInput = req.body.days ?? req.body.daysPerWeek;
+    const days = Number(daysInput);
     const userId = (req as any).user?.id;
 
-    if (!userId || !days) {
+    if (!userId || !goal || !location || !Number.isFinite(days) || days <= 0) {
       res.status(400).json({ message: "Missing required fields" });
       return;
     }
@@ -43,7 +44,6 @@ export const generateProgram = async (
   }
 };
 
-
 // 📥 Get Program
 export const getProgram = async (
   req: Request,
@@ -65,7 +65,6 @@ export const getProgram = async (
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 //  Weekly Progression Update
 export const updateWeeklyProgression = async (

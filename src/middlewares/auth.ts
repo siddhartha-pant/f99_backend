@@ -28,9 +28,18 @@ const auth: RequestHandler = (req, res, next) => {
   try {
     const decodedToken: any = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 🔥 FIX HERE
+    const resolvedUserId =
+      decodedToken.userId || decodedToken.id || decodedToken._id;
+
+    if (!resolvedUserId) {
+      res.status(401).json({ message: "Invalid token payload." });
+      return;
+    }
+
+    // Keep both keys for compatibility with existing controllers.
     (req as any).user = {
-      id: decodedToken.id || decodedToken._id
+      userId: resolvedUserId,
+      id: resolvedUserId
     };
 
     next();
