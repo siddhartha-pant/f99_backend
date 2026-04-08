@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { adjustDifficulty } from "../utils/progression.logic";
 import {
   getSplit,
   generateWorkouts
