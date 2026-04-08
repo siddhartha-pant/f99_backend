@@ -14,7 +14,8 @@ export const generateProgram = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { userId, days, goal, location } = req.body;
+    const {  days, goal, location } = req.body;
+    const userId = (req as any).user?.id;
 
     if (!userId || !days) {
       res.status(400).json({ message: "Missing required fields" });
