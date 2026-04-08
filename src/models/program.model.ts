@@ -1,55 +1,65 @@
-const mongoose = require("mongoose");
+import mongoose, { Schema, Document, Types } from "mongoose";
 
-// USER
-const userSchema = new mongoose.Schema({
+export interface IExercise {
+  name: string;
+  sets: number;
+  reps: string;
+  rest: string;
+  progressionType: string;
+}
+
+export interface IWorkout {
+  day: string;
+  exercises: IExercise[];
+}
+
+export interface IProgram extends Document {
+  userId: Types.ObjectId;
+  daysPerWeek: number;
+  goal: string;
+  location: string;
+  split: string;
+  duration: number;
+
+  workouts: IWorkout[];
+
+  currentWeek: number;
+  startedAt: Date;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const exerciseSchema = new Schema<IExercise>({
   name: String,
-  email: String,
-  password: String,
-  currentProgram: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Program"
-  }
+  sets: Number,
+  reps: String,
+  rest: String,
+  progressionType: String
 });
 
-// PROGRAM
-const programSchema = new mongoose.Schema({
-  userId: mongoose.Schema.Types.ObjectId,
-  daysPerWeek: Number,
-  goal: String,
-  location: String,
-  split: String,
-  duration: Number,
-
-  workouts: [
-    {
-      day: String,
-      exercises: [
-        {
-          name: String,
-          sets: Number,
-          reps: String,
-          rest: String,
-          progressionType: String
-        }
-      ]
-    }
-  ],
-
-  currentWeek: { type: Number, default: 1 },
-  startedAt: Date
+const workoutSchema = new Schema<IWorkout>({
+  day: String,
+  exercises: [exerciseSchema]
 });
 
-// EXERCISE LOG
-const exerciseLogSchema = new mongoose.Schema({
-  userId: mongoose.Schema.Types.ObjectId,
-  programId: mongoose.Schema.Types.ObjectId,
-  exerciseName: String,
-  date: Date,
-  sets: [{ weight: Number, reps: Number }]
-});
+const programSchema = new Schema<IProgram>(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    daysPerWeek: Number,
+    goal: String,
+    location: String,
+    split: String,
+    duration: Number,
+    workouts: [workoutSchema],
+    currentWeek: { type: Number, default: 1 },
+    startedAt: Date
+  },
+  { timestamps: true }
+);
 
-module.exports = {
-  User: mongoose.model("User", userSchema),
-  Program: mongoose.model("Program", programSchema),
-  ExerciseLog: mongoose.model("ExerciseLog", exerciseLogSchema)
-};
+export default mongoose.model<IProgram>("Program", programSchema);
