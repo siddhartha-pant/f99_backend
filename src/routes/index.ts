@@ -7,7 +7,7 @@ import nutritionRoutes from "./nutrition.routes";
 import progressPhotoRoutes from "./progressPhoto.routes";
 import goalRoutes from "./goal.routes";
 import healthRoutes from "./health.routes";
-import express from "express";
+
 import programRoutes from "./program.routes";
 import workoutRoutes from "./workout.routes";
 
