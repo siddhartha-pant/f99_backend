@@ -27,7 +27,9 @@ const app = express();
 // ── Security headers ──
 app.use(helmet());
 
-app.use(cors());
+app.use(
+  cors({ origin: "https://f99-backend.onrender.com/", credentials: true }),
+);
 // ── Rate limiting ──
 // Strict limit on auth routes to prevent brute-force
 const authLimiter = rateLimit({
